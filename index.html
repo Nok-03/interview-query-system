@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>面試查詢系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // 引入 useState 以及新登場的 useEffect
+    const { useState, useEffect } = React;
+
+    function InterviewQuerySystem() {
+      // 1. 將學生資料改成狀態，一開始是空的陣列
+      const [studentData, setStudentData] = useState([]);
+      
+      const [searchMethod, setSearchMethod] = useState('ticket');
+      const [inputName, setInputName] = useState('');
+      const [inputValue, setInputValue] = useState('');
+      const [result, setResult] = useState(null);
+      const [errorMsg, setErrorMsg] = useState('');
+
+      // 2. 學習重點：當組件「第一次渲染完成」後，執行裡面的程式碼
+      useEffect(() => {
+        // 使用 fetch 去撈取同目錄底下的 data.json
+        fetch('data.json')
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('網路回應不成功');
+            }
+            return response.json(); // 將讀取到的文字轉換成 JavaScript 物件/陣列
+          })
+          .then((data) => {
+            setStudentData(data); // 成功拿到資料後，更新狀態
+          })
+          .catch((error) => {
+            console.error('讀取資料失敗:', error);
+            setErrorMsg('系統初始化失敗，無法載入學生資料。');
+          });
+      }, []); // 後面的空陣列 [] 確保這個 fetch 只會執行「這一次」
+
+      const handleSearch = (e) => {
+        e.preventDefault();
+        setErrorMsg('');
+        setResult(null);
+
+        // 如果資料還沒載入完成，不給查詢
+        if (studentData.length === 0) {
+          setErrorMsg('系統資料載入中，請稍候再試');
+          return;
+        }
+
+        if (!inputName.trim() || !inputValue.trim()) {
+          setErrorMsg('請完整輸入姓名與查詢號碼');
+          return;
+        }
+
+        const foundStudent = studentData.find((student) => {
+          const isNameMatch = student.name === inputName.trim();
+          let isValueMatch = false;
+          if (searchMethod === 'ticket') isValueMatch = student.ticket === inputValue.trim();
+          if (searchMethod === 'phone') isValueMatch = student.phone === inputValue.trim();
+          if (searchMethod === 'idCard') isValueMatch = student.idCard === inputValue.trim();
+          return isNameMatch && isValueMatch;
+        });
+
+        if (foundStudent) {
+          setResult(foundStudent);
+        } else {
+          setErrorMsg('查無此資料，請確認輸入資訊是否正確');
+        }
+      };
+
+      return (
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 w-full max-w-md">
+            <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">甄選面試查詢系統</h1>
+            <form onSubmit={handleSearch} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">考生姓名</label>
+                <input type="text" value={inputName} onChange={(e) => setInputName(e.target.value)} className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="請輸入姓名" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">驗證方式</label>
+                <select value={searchMethod} onChange={(e) => { setSearchMethod(e.target.value); setInputValue(''); }} className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  <option value="ticket">准考證號碼</option>
+                  <option value="phone">手機號碼</option>
+                  <option value="idCard">身分證字號</option>
+                </select>
+              </div>
+              <div>
+                <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder={`請輸入${searchMethod === 'ticket' ? '准考證' : searchMethod === 'phone' ? '手機' : '身分證'}號碼`} />
+              </div>
+              {errorMsg && <div className="text-red-500 text-sm font-medium text-center">{errorMsg}</div>}
+              <button type="submit" className="w-full bg-blue-600 text-white font-bold rounded-lg p-3 mt-4 hover:bg-blue-700 transition duration-200">查詢面試資訊</button>
+            </form>
+            {result && (
+              <div className="mt-8 border-t pt-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4 text-center border-b-2 border-blue-500 inline-block pb-1">面試報到資訊</h2>
+                <div className="space-y-3 bg-blue-50 p-4 rounded-lg">
+                  <p className="flex justify-between border-b border-blue-100 pb-2"><span className="text-gray-600 font-medium">考生姓名：</span><span className="font-bold text-gray-900">{result.name}</span></p>
+                  <p className="flex justify-between border-b border-blue-100 pb-2"><span className="text-gray-600 font-medium">報考類別：</span><span className="font-bold text-gray-900">{result.category}</span></p>
+                  <p className="flex justify-between border-b border-blue-100 pb-2 text-blue-700"><span className="font-medium">報到時間：</span><span className="font-bold text-lg">{result.time}</span></p>
+                  <p className="flex justify-between text-blue-700"><span className="font-medium">報到地點：</span><span className="font-bold">{result.location}</span></p>
+                </div>
+                <p className="text-xs text-gray-500 mt-4 text-center">請務必於報到時間前抵達指定地點。</p>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<InterviewQuerySystem />);
+  </script>
+</body>
+</html>

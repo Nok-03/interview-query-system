@@ -1,0 +1,6 @@
+[
+  { "id": 1, "category": "資管類（資安人才）", "ticket": "2450250001", "phone": "0966943495", "idCard": "F132222349", "name": "田家名", "school": "私立復興商工", "room": "1-C-01", "group": "1", "time": "8:00~8:20", "location": "誠信館3樓" },
+  { "id": 2, "category": "資管類（資安人才）", "ticket": "2450250003", "phone": "0968490326", "idCard": "A132036099", "name": "林杰彥", "school": "市立松山家商", "room": "1-C-02", "group": "1", "time": "8:00~8:20", "location": "誠信館3樓" },
+  { "id": 3, "category": "資管類（資安人才）", "ticket": "2450250004", "phone": "0908668993", "idCard": "F130430003", "name": "黃邦齊", "school": "私立清傳高商", "room": "1-C-03", "group": "1", "time": "8:00~8:20", "location": "誠信館3樓" },
+  { "id": 10, "category": "資管類", "ticket": "2450230071", "phone": "0900322468", "idCard": "B123640960", "name": "陳中允", "school": "市立鶯歌工商", "room": "2-C-01", "group": "2", "time": "8:55~9:15", "location": "誠信館3樓" }
+]
